@@ -1,0 +1,1 @@
+{"mlp_base": {"train_loss": 0.1537558230701834, "validation_loss": 2.7909978189468383, "accuracy": 0.6845}, "cnn_base": {"train_loss": 0.3992190507253011, "validation_loss": 0.38497310090065, "accuracy": 0.7823333333333333}, "lstm_base": {"train_loss": 0.48423395470778147, "validation_loss": 0.47090436720848083, "accuracy": 0.7651666666666667}}
