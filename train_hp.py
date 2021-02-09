@@ -24,7 +24,10 @@ data_raw_path = "./data/train"
 path_to_output = "./results/"
 data_processed_path = "./processed_data/"
 
-get_data = False
+
+# For faster training we choose to load the dataset once, and save the data tensors, 
+# rather than implementing a Dataset class with preprocessing transformations
+get_data = True
 
 if get_data:
   
@@ -38,6 +41,6 @@ else :
     X = torch.load(data_processed_path + "data.pth")
     Y = torch.load(data_processed_path + "target.pth")
 
-X_train, X_valid, Y_train, Y_valid = train_test_split(X, Y, test_size = 0.2
-                                                              , random_state = RANDOM_STATE
-                                                              , stratify = Y)
+#X_train, X_valid, Y_train, Y_valid = train_test_split(X, Y, test_size = 0.2
+#                                                              , random_state = RANDOM_STATE
+#                                                              , stratify = Y)
