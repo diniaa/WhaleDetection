@@ -1,10 +1,9 @@
 import torch
-import torchvision
 import numpy as np
 from sklearn.model_selection import train_test_split
 import torch.nn as nn
 from torchvision.models import resnet18
-from torchvision import datasets, transforms
+from torchvision import transforms
 from preprocess import get_images
 import os
 from PIL import Image
@@ -84,13 +83,19 @@ class CustomDataSet(Dataset):
 targets = torch.load(data_processed_path + "target.pth")
 my_dataset = CustomDataSet(img_dir, data_transforms, targets)
 
+
+# To split our dataset into a training set and validation set in a fashion
+# that suit our custom dataset, we get the training and validation indices
 train_idx, valid_idx= train_test_split(
         np.arange(len(targets)),
         test_size=0.2,
         random_state= RANDOM_STATE,
         stratify=targets)
 
-# We use SubsetRandomSampler as a strategy for drawing batches 
+# We use SubsetRandomSampler as a strategy for drawing batches ,
+# passing the training and validation indices
+# Drawback : the sampler doesn't support shuffling
+
 train_sampler = torch.utils.data.SubsetRandomSampler(train_idx)
 valid_sampler = torch.utils.data.SubsetRandomSampler(valid_idx)
 
@@ -153,4 +158,4 @@ with open("./results/CNNTransferLearning.json", "w") as fp:
 
 #save model
 
-torch.save(my_net.state_dict(), "./models/CNNTransferLearning.pth")
+torch.save(my_net.state_dict(), "./models/CNNTransferLearning.pt")

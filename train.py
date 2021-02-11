@@ -13,12 +13,17 @@ from sklearn.model_selection import train_test_split
 from model_scratch import MLP, Conv1D, LSTM
 import json
 
+
+# settings
+
+WAVE_LENGTH = 4000 # number of samples in the audio files
+
 RANDOM_STATE = 42
 torch.manual_seed(RANDOM_STATE)
 np.random.seed(RANDOM_STATE)
-
-
 device = torch.device("cpu")
+
+
 annotations = pd.read_csv("./data/train.csv")
 data_path = "./data/train"
 path_to_output = "./results/"
@@ -71,7 +76,7 @@ valid_loader = torch.utils.data.DataLoader(
 criterion = nn.BCELoss()
 
 
-model_mlp = MLP(4000)
+model_mlp = MLP(WAVE_LENGTH)
 model_conv = Conv1D()
 model_lstm = LSTM()
 
@@ -103,7 +108,7 @@ def training_loop(model,train_loader,criterion, n_epochs = 40):
                 train_loss += loss.item() * len(x)
                 
             if batch_idx % 100 ==0 :
-                print("Current loss at epoch {}, batch {} is : {}".format(epoch, batch_idx, loss.item()))
+                print("Current loss at epoch {}, batch {} is : {}".format(epoch + 1, batch_idx, loss.item()))
             
             loss.backward()
             optim.step()
