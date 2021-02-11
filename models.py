@@ -20,4 +20,45 @@ class MLP(nn.Module):
         x = self.sigmoid(self.fc3(x))
         
         return x
+
+
+class CNN(nn.Module):
+    
+    def __init__(self, in_channels = 1, n_featuremap_1 = 16, n_featuremap_2 = 33):
+        
+        super().__init__()
+        
+        self.conv1 = nn.Conv1d(in_channels, n_featuremap_1, kernel_size = 5, padding = 2)
+        self.pool1 = nn.MaxPool1d(5, stride = 5)
+        self.conv2 = nn.Conv1d(n_featuremap_1 , n_featuremap_2, kernel_size = 5, stride = 5)
+        self.pool2 = nn.MaxPool1d(5, stride = 1)
+        self.conv_fc = nn.Conv1d(n_featuremap_2, 1, kernel_size = 1)
+        self.drop_out = nn.Dropout()
+        self.fc = nn.Linear(156, 1)
+        self.sigmoid = nn.Sigmoid()
+        
+    def forward(self, x):
+        
+        x = self.pool1(self.conv1(x))
+        x = self.pool2(self.conv2(x))
+        x = self.conv_fc(x)
+        x = self.drop_out(x)
+        x = self.sigmoid(self.fc(x))
+        return x
+
+def init_weights(l, mode = "uniform"):
+    
+    if isinstance(l, nn.Conv1d) or isinstance(l, nn.Linear) :
+        
+        if mode == "uniform":
+            nn.init.xavier_uniform_(l.weight)
+        
+        if mode == "normal":
+            nn.init.xavier_normal_(l.weight)
+            
+        if mode == "zero":
+            nn.init.zeros_(l.weight)
+        
+        
+        
     

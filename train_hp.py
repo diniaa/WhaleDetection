@@ -11,9 +11,10 @@ from sklearn.model_selection import train_test_split
 
 import json
 
+from functools import partial
 from itertools import product
 
-from models import MLP
+from models import MLP, CNN, init_weights
 
 WAVE_LENGTH = 4000
 BATCH_SIZE = 64
@@ -53,14 +54,20 @@ valid = torch.utils.data.TensorDataset(X_valid, Y_valid)
 
 ################################## MLP hyperparameter tuning ##############################
 
-def get_info(combination):
-    l1, l2, weight_decay, batch_size = combination
-    return {"l1" : l1, "l2" : l2, "weight_decay" : weight_decay,"batch_size": batch_size }
+def get_info(combination, model_type = "mlp"):
+    
+    if model_type == "mlp":
+        l1, l2, weight_decay, batch_size = combination
+        return {"l1" : l1, "l2" : l2, "weight_decay" : weight_decay,"batch_size": batch_size }
+    
+    if model_type =="cnn":
+        n_featuremap_1, n_featuremap_2, mode = combination
+        return {"n_featuremap_1" : n_featuremap_1, "n_featuremap_2" : n_featuremap_2,
+                "initialization_mode" : mode }
+    
 
 
-
-
-def training_run(combination, criterion, train, valid, results, run):
+def training_run_mlp(combination, criterion, train, valid, run):
     
     l1, l2, weight_decay, batch_size = combination
     model_path = "MLP_run_{}.pt".format(run)
@@ -144,11 +151,12 @@ params = {
     "batch_size": [64, 128]
 }
 
-def main(params):
+results = dict()
+info = dict()
+
+def tune_mlp(params):
     
-    results = dict()
     run = 0
-    info = dict()
     
     for combination in product(*params.values()):
         
@@ -157,14 +165,118 @@ def main(params):
         
         print("""Starting training for hyperparameters : l1 = {}, l2 = {},
               weight_decay = {}, batch_size = {}""".format(*combination))
-        training_run(combination, criterion, train, valid, results, run)
+        training_run_mlp(combination, criterion, train, valid, run)
     
     with open("./results/run_info.json", "w") as fp:
         fp.write(json.dumps(info))
     with open("./results/run_results.json", "w") as fp:
         fp.write(json.dumps(results))
     
-    return results
 
+tune_mlp(params)
 
 ##################################  CNN hyperparameter tuning ##############################
+
+train_loader = torch.utils.data.DataLoader(
+                   dataset=train,
+                   batch_size=BATCH_SIZE,
+                   shuffle=True)
+    
+valid_loader = torch.utils.data.DataLoader(
+                 dataset=valid,
+                 batch_size= 2 * BATCH_SIZE,
+                 shuffle=False)
+
+def training_run_cnn(combination, criterion, train_loader, valid_loader, run):
+    
+    n_featuremap_1, n_featuremap_2, mode = combination
+    model_path = "CNN_run_{}.pt".format(run)
+    results[model_path] = dict()
+    my_net = CNN(n_featuremap_1 = n_featuremap_1, n_featuremap_2 = n_featuremap_2)
+    my_net.apply(partial(init_weights, mode = mode))
+    my_net.to(device)
+
+    optimizer = torch.optim.Adam(my_net.parameters())
+
+    for epoch in range(10):  # loop over the training dataset multiple times
+    
+        training_loss = .0
+        pbar = tqdm(10)
+        
+        for batch_idx, (x, target) in enumerate(train_loader):
+            x, target = x.to(device), target.to(device)
+
+            # zero the parameter gradients
+            optimizer.zero_grad()
+
+            # forward + backward + optimize
+            outputs = my_net(x).view(-1,1)
+            loss = criterion(outputs, target.view(-1,1))
+            loss.backward()
+            optimizer.step()
+            
+            if epoch == 9:
+                training_loss += loss.item() * len(x)
+        
+            if batch_idx % 100 == 99:  # print every 100 mini-batches
+                print("[ Epoch %d,Batch %2d] loss: %.3f" % (epoch + 1, batch_idx + 1,
+                                                loss.item()))
+                
+        
+        pbar.update(1)
+    
+    results[model_path]["training_loss"] = training_loss/ len(train)
+    
+    print("Finished Training !")
+    print("Start Evaluating !")
+    
+    # Validation loss
+    valid_loss = .0
+    correct = 0
+    with torch.no_grad():
+        for batch_idx,(x, target) in enumerate(valid_loader):
+            x, target = x.to(device), target.to(device)
+
+            outputs = my_net(x).view(-1,1)
+            prediction = outputs >= 0.5
+            correct += prediction.eq(target.view(-1,1)).sum().item()
+
+            loss = criterion(outputs, target.view(-1,1))
+            valid_loss += loss.item() * len(x)
+                  
+    
+    results[model_path]["validation_loss"] = valid_loss/ len(valid)
+    results[model_path]["accuracy"] = correct/ len(valid)
+    
+    torch.save(my_net.state_dict(), "./models/" + model_path)
+        
+   
+
+params = {
+    "n_featuremap_1": [8,  16],
+    "n_featuremap_2": [33, 64],
+    "initialization_mode": ["normal", "uniform", "zero"]
+}
+
+
+def tune_cnn(params):
+    
+    run = 0
+    
+    for combination in product(*params.values()):
+        
+        run += 1
+        info["CNN_run_{}.pt".format(run)] = get_info(combination, model_type = "cnn")
+        
+        print("""Starting training for hyperparameters : n_featuremap_1 = {},
+              n_featuremap_2 = {}, mode = {}""".format(*combination))
+        training_run_cnn(combination, criterion, train_loader, valid_loader, run)
+    
+    with open("./results/run_info.json", "w") as fp:
+        fp.write(json.dumps(info))
+    with open("./results/run_results.json", "w") as fp:
+        fp.write(json.dumps(results))
+        
+
+tune_cnn(params)
+
