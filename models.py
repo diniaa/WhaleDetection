@@ -1,8 +1,15 @@
 import torch.nn as nn
 
 
+"""
+The following script contains the customized neural networks classes 
+for which we tune the parameters.
+The script also provides a function for weights initialization 
+
+"""
+
 class MLP(nn.Module):
-    # Configurable MLP
+    # Customized MLP
     def __init__(self, features_in, l1 = 128,  l2= 64):
         
         super().__init__()
@@ -23,7 +30,7 @@ class MLP(nn.Module):
 
 
 class CNN(nn.Module):
-    
+    # Customized CNN
     def __init__(self, in_channels = 1, n_featuremap_1 = 16, n_featuremap_2 = 33):
         
         super().__init__()
@@ -39,6 +46,7 @@ class CNN(nn.Module):
         
     def forward(self, x):
         
+        x = x.view(x.size(0),1,x.size(-1))
         x = self.pool1(self.conv1(x))
         x = self.pool2(self.conv2(x))
         x = self.conv_fc(x)
@@ -48,6 +56,8 @@ class CNN(nn.Module):
 
 def init_weights(l, mode = "uniform"):
     
+    # glorot initialization
+    # initialize weights only (no bias), for linear and convolutional layers
     if isinstance(l, nn.Conv1d) or isinstance(l, nn.Linear) :
         
         if mode == "uniform":

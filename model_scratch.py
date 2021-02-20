@@ -1,5 +1,12 @@
 import torch.nn as nn
 
+
+"""
+The following script contains the neural networks classes serving as our baseline
+for the Whale Detection Challenge
+
+"""
+
 class MLP(nn.Module):
     
     def __init__(self, features_in):
@@ -38,7 +45,7 @@ class Conv1D(nn.Module):
         
     def forward(self, x):
         
-        x = x.view(x.size(0),1,x.size(1))
+        x = x.view(x.size(0),1,x.size(-1))
         x = self.pool1(self.conv1(x))
         x = self.pool2(self.conv2(x))
         x = self.conv_fc(x)
@@ -52,6 +59,7 @@ class LSTM(nn.Module):
     def __init__(self, input_size=1, hidden_layer_size=50, output_size=1):
         
         super().__init__()
+        
         self.hidden_layer_size = hidden_layer_size
 
         self.lstm = nn.LSTM(input_size, hidden_layer_size)
@@ -62,7 +70,7 @@ class LSTM(nn.Module):
 
     def forward(self, input_seq):
         
-        input_seq = input_seq.view(input_seq.size(0), input_seq.size(1), 1).permute(1, 0 , 2)
+        input_seq = input_seq.view(input_seq.size(0), input_seq.size(-1), 1).permute(1, 0 , 2)
         lstm_out, hidden = self.lstm(input_seq)
         predictions = self.linear(lstm_out.view(len(input_seq),-1, self.hidden_layer_size))
         predictions = self.sigmoid(predictions)

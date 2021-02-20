@@ -13,4 +13,6 @@ soundfile : Backend library for torchaudio (used for reading/writing)
 
 librosa : Audio analysis package
 
+json : Reading and writing json files (serializing dictionnaries that store networks' results) 
+
 aifc, matplotlib, pandas .
