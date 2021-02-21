@@ -8,7 +8,7 @@ The dataset is provided within the Kaggle challenge in this [link](https://www.k
 
 ## Requirements :
 
-* pytorch : Deep learning & neaural network framework
+* pytorch : Deep learning & neural network framework
 * torchaudio : Audio processing library for pytorch
 * soundfile : Backend library for torchaudio (used for reading/writing)
 * librosa : Audio analysis package
