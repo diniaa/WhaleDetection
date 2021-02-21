@@ -35,7 +35,7 @@ The repository is organized as the following tree
 * ```models_baseline.py``` contains the neural network classes trained in the first iteration (baseline)
 * ```train.py``` provides code to train and validate the models in ```models_baseline.py```
 * ```models.py``` contains the neural network classes trained in the second iteration
-* ```train.py``` provides code to train and validate the models in ```models.py```
+* ```train_hp.py``` provides code to train and validate the models in ```models.py```
 * ```eval.py``` further evaluates the trained models according to ROC scores
 * ```transfer.py``` provides a transfer learning approach
 * ```models``` directory stores saved networks
