@@ -11,7 +11,7 @@ from torchvision import transforms
 from torchvision.models import resnet18
 from torch.utils.data import Dataset
 
-from model_scratch import MLP, Conv1D, LSTM
+from models_baseline import MLP, Conv1D, LSTM
 from models import CNN
 
 import json
@@ -26,6 +26,7 @@ on roc score on the validation set
 """
 
 ######################################## Settings #############################################
+WAVE_LENGTH = 4000
 RANDOM_STATE = 42
 np.random.seed(RANDOM_STATE)
 BATCH_SIZE = 512
@@ -36,6 +37,10 @@ data_processed_path = "./processed_data/"
 
 ####################################### First iteration ########################################
 
+"""
+In this section, we compare networks from our baseline solutions
+"""
+
 valid = torch.load(data_processed_path + "valid.pth", map_location = device)
 valid_loader = torch.utils.data.DataLoader(
                  dataset=valid,
@@ -44,7 +49,7 @@ valid_loader = torch.utils.data.DataLoader(
     
 
 
-model_mlp = MLP(4000)
+model_mlp = MLP(WAVE_LENGTH)
 model_conv = Conv1D()
 model_lstm = LSTM()
 
@@ -105,6 +110,10 @@ plt.show()
 
 ####################################### Second iteration ########################################
 
+"""
+In this section, we compare the best tuned CNN network to the CNN from the baseline
+"""
+
 data = torch.load(data_processed_path + "data.pth")
 targets = torch.load(data_processed_path + "target.pth")
 
@@ -152,7 +161,12 @@ plt.show()
 
 ####################################### Transfer ########################################
 
-# load trained network
+"""
+In this section, we compare the best tuned CNN network to the CNN trained by transfer learning
+from ResNet18.
+"""
+
+# load saved network
 resnet = resnet18(pretrained = True)
 class CnnTransferNet(nn.Module):
     def __init__(self):
@@ -218,6 +232,7 @@ train_idx, valid_idx= train_test_split(
         stratify=targets)
 valid_sampler = torch.utils.data.SubsetRandomSampler(valid_idx)
 valid_loader_3 = torch.utils.data.DataLoader(my_dataset, batch_size = 256, sampler = valid_sampler)
+
 
 true_tensor, pred_tensor = eval(my_net, valid_loader_3)
 print("transfer net roc score : %.4f" % roc_auc_score(true_tensor, pred_tensor))

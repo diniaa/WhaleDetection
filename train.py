@@ -8,7 +8,7 @@ import torch.nn as nn
 from preprocess import load_dataset
 from sklearn.model_selection import train_test_split
 
-from model_scratch import MLP, Conv1D, LSTM
+from models_baseline import MLP, Conv1D, LSTM
 import json
 
 

@@ -14,7 +14,7 @@ import json
 
 """
 The following script presents a transfer learning approach to the Whale Detection Challenge
-We use a pretrained model (ResNet 18) and adapt it to our classification pronlem.
+We use a pretrained model (ResNet 18) and adapt it to our classification problem.
 We freeze all low-level layers of ResNet and replace the last fully connected layer 
 by a fully connceted layer with 1 neuron, in order to learn a linear classifier.
 The network is fed images of melspectrograms of the original signals, and trained and evaluated 

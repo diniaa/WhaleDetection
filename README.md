@@ -21,7 +21,7 @@ The repository is organized as the following tree
 ├── README.md
 ├── preprocess.py
 ├── train.py
-├── model_scratch.py
+├── models_baseline.py
 ├── train_hp.py
 ├── models.py
 ├── eval.py
@@ -32,11 +32,13 @@ The repository is organized as the following tree
 ```
 
 * ```preprocess.py``` is used for data preprocessing
-* ```model_scratch.py``` contains the neural network classes trained in the first iteration (baseline)
-* ```train.py``` provides code to train and validate the models in ```model_scratch.py```
+* ```models_baseline.py``` contains the neural network classes trained in the first iteration (baseline)
+* ```train.py``` provides code to train and validate the models in ```models_baseline.py```
 * ```models.py``` contains the neural network classes trained in the second iteration
 * ```train.py``` provides code to train and validate the models in ```models.py```
 * ```eval.py``` further evaluates the trained models according to ROC scores
 * ```transfer.py``` provides a transfer learning approach
+* ```models``` directory stores saved networks
+* ```results``` directory stores all kinds of results and outputs.
 
 The folders  ```data```, ```processed_data``` and ```img_data``` are used to store datasets and aren't tracked in this git repository (put in ```.gitignore```)
